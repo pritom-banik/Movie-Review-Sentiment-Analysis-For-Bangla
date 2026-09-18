@@ -61,6 +61,7 @@
 
 import json
 import re
+from pathlib import Path
 
 import torch
 import streamlit as st
@@ -90,6 +91,7 @@ HF_REPO_ID = "pritom-banik/banglabert-movie-sentiment"
 
 # Maximum input length
 MAX_LEN = 256
+BASE_DIR = Path(__file__).resolve().parent
 
 
 # ============================================================
@@ -111,7 +113,7 @@ def clean_bangla_text(text: str) -> str:
 
 @st.cache_data
 def load_label_map():
-    with open("label_map.json", "r", encoding="utf-8") as f:
+    with (BASE_DIR / "label_map.json").open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -125,8 +127,8 @@ hub_label_map = load_label_map()
 @st.cache_resource
 def load_model():
 
-    # Get Hugging Face token from Streamlit secrets
-    hf_token = st.secrets["HF_TOKEN"]
+    # The model is public, so a Hugging Face token is optional.
+    hf_token = st.secrets.get("HF_TOKEN")
 
     # Use GPU if available
     device = 0 if torch.cuda.is_available() else -1
@@ -142,7 +144,6 @@ def load_model():
     return classifier
 
 
-hub_classifier = load_model()
 
 
 # ============================================================
